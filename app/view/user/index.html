@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Data</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-container input[type="text"] {
+            padding: 10px;
+            width: 200px;
+        }
+		.button-container {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        /* Style for the button */
+        .action-button {
+            padding: 10px 20px;
+            background-color: #007bff; /* Change the background color as needed */
+            color: #fff; /* Text color */
+            border: none;
+            cursor: pointer;
+			text-decoration: none;
+        }
+		/* For Pagination */
+		.pagination {
+			font-family: Verdana, sans-serif;
+			padding:20px;
+			margin:7px;
+		}
+		.pagination a {
+			margin: 2px;
+			padding: 0.3em 0.64em 0.43em 0.64em;
+			background-color: #2e25a2;
+			text-decoration: none;
+			color: #fff;
+			-webkit-box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
+			box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
+			-webkit-transition: all .2s linear;
+			-o-transition: all .2s linear;
+			transition: all .2s linear;
+			-webkit-border-radius: .125rem;
+			border-radius: .125rem;
+		}
+		.pagination a:hover, .pagination a:active {
+			padding: 0.3em 0.64em 0.43em 0.64em;
+			margin: 2px;
+			background-color: #de1818;
+			color: #fff;
+		}
+    </style>
+</head>
+<body>
+    <h2>Employee Data</h2>
+    <!-- Add a search input field -->
+    <div class="search-container">
+        <input type="text" id="search" name="search" placeholder="Search..." onkeyup="filteremployee()">
+    </div>
+	<div class="button-container">
+        <a class="action-button" href="add-user">Add New</a>
+		<a class="action-button" style="background-color: red;" href="logout">Log Out</a>
+    </div>
+	<div id="postContent">
+		<table>
+			<thead>
+				<tr>
+					<th>Sl</th>
+					<th>Name</th>
+					<th>Designation</th>
+					<th>Mobile</th>
+					<th>Email</th>
+					<th>Address</th>
+					<th>Date of Birth</th>
+					<th>Date of Joining</th>
+					<th>Blood Group</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				$i=1;
+				include_once 'Pagination.class.php';
+				$baseURL = 'filteremployee.php';
+				$limit = 10;
+				$query=$conn->query("SELECT COUNT(*) as num_rows FROM user_details");
+				$result  = $query->fetch_assoc();
+				$rowCount= $result['num_rows'];
+				$pagConfig = array(
+					'baseURL' => $baseURL,
+					'totalRows' => $rowCount,
+					'perPage' => $limit,
+					'contentDiv' => 'postContent',
+					'link_func' => 'filteremployee'
+				);
+				$pagination =  new Pagination($pagConfig);
+				$ResEmployee = $conn->query("SELECT * FROM user_details ORDER BY id DESC LIMIT $limit");
+				if($ResEmployee->num_rows >0)
+				{
+					while($ResultsEmployee=$ResEmployee->fetch_object())
+					{
+				?>
+					<tr>
+						<td><?php echo $i;?></td>
+						<td><?php echo $ResultsEmployee->name;?></td>
+						<td><?php echo $ResultsEmployee->designation;?></td>
+						<td><?php echo $ResultsEmployee->mobile;?></td>
+						<td><?php echo $ResultsEmployee->email;?></td>
+						<td><?php echo $ResultsEmployee->address;?></td>
+						<td><?php echo date('d-m-Y',strtotime($ResultsEmployee->dob));?></td>
+						<td><?php echo date('d-m-Y',strtotime($ResultsEmployee->doj));?></td>
+						<td><?php echo $ResultsEmployee->blood_group;?></td>
+						<td>
+							<?php if($_SESSION['adminid'] =='superadmin'){?>
+								<a type="button" class="btn btn-secondary" href="add-user?edited=<?php echo $ResultsEmployee->id;?>">Edit</a>
+							<?php } ?>
+							<a type="button" class="btn btn-danger" href="javascript:void(0)" onclick="deleteuser(<?php echo $ResultsEmployee->id;?>)">Delete</a>
+						</td>
+					</tr>
+				<?php $i++;} } else { ?>
+					<tr><td style="color:red;text-align:center;" colspan="11">No list found !</td></tr>
+			<?php } ?>
+			</tbody>
+		</table>
+		<?php echo $pagination->createLinks();?>
+	</div>
+</body>
+<script src="<?php echo $ProjectPath;?>js/jquery-3.6.0.min.js"></script>
+<script>
+function filteremployee(page_num)
+{
+    var search = $("#search").val();
+	page_num = page_num?page_num:0;
+	$.ajax({
+		type: 'POST',
+		url: '<?php echo $ProjectPath;?>filteremployee.php',
+		data:'page='+page_num+'&search='+search,
+		success: function (html) {
+			$('#postContent').html(html);
+		}
+	});
+}
+function deleteuser(deletid)
+{
+	var msg=confirm('Are you sure ?');
+	if(msg)
+	{
+		$.ajax({
+			type: 'POST',
+			url: '<?php echo $ProjectPath;?>deleteuser.php',
+			data:'deleteid='+deletid,
+			success: function (html) {
+				filteremployee();
+			}
+		});
+	}
+}
+</script>
+</html>

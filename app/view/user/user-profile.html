@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <!-- Add Bootstrap CSS Link -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<style>
+		.button-container {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        /* Style for the button */
+        .action-button {
+            padding: 10px 20px;
+            background-color: #007bff; /* Change the background color as needed */
+            color: #fff; /* Text color */
+            border: none;
+            cursor: pointer;
+			text-decoration: none;
+        }
+	</style>
+</head>
+<body>
+    <div class="container">
+        <h2>Profile of <?php echo $ResultsEmployee->name;?></h2>
+	<div class="button-container">
+		<a class="action-button" style="background-color: red;" href="logout">Log Out</a>
+    </div>
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Left column -->
+                <form action="#" method="POST" enctype="multipart/form-data" id="registration-form" >
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" class="form-control" id="name" name="name" value="<?php echo $ResultsEmployee->name;?>" >
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" value="<?php echo $ResultsEmployee->email;?>"  >
+                    </div>
+                    <div class="form-group">
+                        <label for="mobile">Mobile:</label>
+                        <input type="number" class="form-control" id="mobile" name="mobile"  value="<?php echo $ResultsEmployee->mobile;?>" >
+                    </div>
+                    <div class="form-group">
+                        <label for="designation">Designation:</label>
+                        <input type="text" class="form-control" id="designation" name="designation" value="<?php echo $ResultsEmployee->designation;?>">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender:</label>
+                        <select class="form-control" id="gender" name="gender" >
+                            <option value="">Select</option>
+                            <option value="male" <?php if($ResultsEmployee->gender=='male'){ echo "SELECTED";}?>>Male</option>
+                            <option value="female" <?php if($ResultsEmployee->gender=='female'){ echo "SELECTED";}?>>Female</option>
+                            <option value="other" <?php if($ResultsEmployee->gender=='other'){ echo "SELECTED";}?>>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-pic">Profile Picture:</label>
+                        <input type="file" class="form-control" id="profile-pic" name="profile-pic" accept="image/*"><br>
+						<?php if($edited !=''){?>
+							<img id="image-preview" src="<?php echo $ResultsEmployee->profile;?>" alt="Preview" style="height:200px;wiidth:200px;">
+							<input type="hidden" name="hideprofile" id="hideprofile" value="<?php echo $ResultsEmployee->profile;?>">
+						<?php } else { ?>
+							<img id="image-preview" src="#" alt="Preview" style="display: none;height:200px;wiidth:200px;">
+							<input type="hidden" name="hideprofile" id="hideprofile" value="">
+						<?php } ?>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <!-- Right column -->
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="text" class="form-control" id="password" name="password" value="<?php echo $ResultsEmployee->pasword;?>"  >
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Blood Group:</label>
+                        <input type="text" class="form-control" id="bloodgroup" name="bloodgroup" value="<?php echo $ResultsEmployee->blood_group;?>">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Date of Birth:</label>
+                        <input type="date" class="form-control" id="dob" name="dob" value="<?php echo $ResultsEmployee->dob;?>">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Date of Join:</label>
+                        <input type="date" class="form-control" id="doj" name="doj" value="<?php echo $ResultsEmployee->doj;?>">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address:</label>
+                        <textarea class="form-control" id="address" name="address" rows="4" ><?php echo $ResultsEmployee->address;?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="signature">Signature:</label>
+                        <input type="file" class="form-control" id="signature" name="signature" accept="image/*">
+						<?php if($edited !=''){?>
+							<img id="image-preview1" src="<?php echo $ResultsEmployee->signature;?>" alt="Preview" style="height:200px;wiidth:200px;">
+							<input type="hidden" name="hidesignature" id="hidesignature" value="<?php echo $ResultsEmployee->signature;?>">
+						<?php } else { ?>
+							<img id="image-preview1" src="#" alt="Preview" style="display: none;height:200px;wiidth:200px;">
+							<input type="hidden" name="hidesignature" id="hidesignature" value="">
+						<?php } ?>
+                    </div>
+					<input type="hidden" name="hideid" value="<?php echo $edited;?>">
+					<button type="submit" class="btn btn-primary">Submit</button>
+					<span id="errmsg" style="color:red;"></span>
+					<span id="succmsg" style="color:green;"></span>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS and jQuery Scripts -->
+	<script src="<?php echo $ProjectPath;?>js/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script>
+        // Get references to the input and image elements
+        const imageInput = document.getElementById('profile-pic');
+        const imagePreview = document.getElementById('image-preview');
+
+        // Add an event listener to the input element
+        imageInput.addEventListener('change', function() {
+            const file = imageInput.files[0];
+
+            // Check if a file is selected
+            if (file) {
+                const reader = new FileReader();
+
+                // Set up the FileReader to display the image when loaded
+                reader.onload = function(e) {
+                    imagePreview.style.display = 'block';
+                    imagePreview.src = e.target.result;
+                };
+
+                // Read the selected file as a data URL
+                reader.readAsDataURL(file);
+            } else {
+                // No file selected, hide the image preview
+                imagePreview.style.display = 'none';
+            }
+        });
+        // Get references to the input and image elements
+        const imageInput1 = document.getElementById('signature');
+        const imagePreview1 = document.getElementById('image-preview1');
+
+        // Add an event listener to the input element
+        imageInput1.addEventListener('change', function() {
+            const file = imageInput1.files[0];
+
+            // Check if a file is selected
+            if (file) {
+                const reader = new FileReader();
+
+                // Set up the FileReader to display the image when loaded
+                reader.onload = function(e) {
+                    imagePreview1.style.display = 'block';
+                    imagePreview1.src = e.target.result;
+                };
+
+                // Read the selected file as a data URL
+                reader.readAsDataURL(file);
+            } else {
+                // No file selected, hide the image preview
+                imagePreview1.style.display = 'none';
+            }
+        });
+		
+		 $("#registration-form").submit(function(event) {
+                event.preventDefault();
+                // Check for blank fields
+                var blankFields = false;
+                $("input[type='text'], input[type='email'], input[type='date'], input[type='number'], input[type='tel'], select, textarea").each(function() {
+                    if ($(this).val() === "") {
+                        blankFields = true;
+                        $(this).addClass("is-invalid");
+                    } else {
+                        $(this).removeClass("is-invalid");
+                    }
+                });
+				if($("#hideprofile").val() =='')
+				{
+					if ($("#profile-pic").val() === "") {
+						blankFields = true;
+						$("#profile-pic").addClass("is-invalid");
+					} else {
+						$("#profile-pic").removeClass("is-invalid");
+					}
+				}
+				if($("#hidesignature").val() =='')
+				{
+					if ($("#signature").val() === "") {
+						blankFields = true;
+						$("#signature").addClass("is-invalid");
+					} else {
+						$("#signature").removeClass("is-invalid");
+					}
+				}
+                if (blankFields) {
+                    $("#errmsg").text("Please fill in all fields.");
+					setTimeout(function(){ $("#errmsg").text(""); }, 4000);
+                    return;
+                }
+
+                // Serialize form data
+                var formData = new FormData(this);
+				$.ajax({
+                    url: "adduser.php",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        $("#succmsg").text("Added successfully !");
+						setTimeout(function(){ $("#succmsg").text(""); }, 3000);
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle errors
+                    }
+                });
+		});
+    </script>
+</body>
+</html>
